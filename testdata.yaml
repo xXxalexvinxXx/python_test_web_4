@@ -1,0 +1,10 @@
+browser: firefox
+address: 'https://test-stand.gb.ru/'
+user: salvadore
+pass: 9a5da6365b
+email: e-mail@email.com
+title: 'Test title'
+descript: 'Test description'
+cont: 'Test content is here'
+message: 'Message is here'
+answer: 'Form successfully submitted'
