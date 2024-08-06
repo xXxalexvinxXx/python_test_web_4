@@ -1,14 +1,16 @@
 import logging
+import time
+import yaml
 
 from testpage import OperationsHelper
-import yaml
-import time
+from testpage import APIOperationsHelper
 
-with open("./testdata.yaml") as f:
+with open('./testdata.yaml') as f:
     testdata = yaml.safe_load(f)
 
 
 def test_step1(browser):
+    """Проверка отображения ошибки при вводе неверных данных для входа."""
     logging.info("Test 1 Start")
     testpage = OperationsHelper(browser)
     testpage.go_to_site()
@@ -19,6 +21,7 @@ def test_step1(browser):
 
 
 def test_step2(browser):
+    """Проверка успешного входа с корректными данными."""
     logging.info("Test 2 Start")
     testpage = OperationsHelper(browser)
     testpage.enter_login(testdata["user"])
@@ -28,6 +31,7 @@ def test_step2(browser):
 
 
 def test_step3(browser):
+    """Проверка создания нового поста."""
     logging.info("Test 3 Start")
     testpage = OperationsHelper(browser)
     testpage.click_new_post_btn()
@@ -40,6 +44,7 @@ def test_step3(browser):
 
 
 def test_step4(browser):
+    """Проверка работы формы 'Contact Us'."""
     logging.info("Test 4 Start")
     testpage = OperationsHelper(browser)
     testpage.open_contact_us()
@@ -49,3 +54,24 @@ def test_step4(browser):
     testpage.contact_btn()
     time.sleep(2)
     assert testpage.get_alert_text() == testdata["answer"]
+
+
+def test_step5(api_client):
+    """API тест: Проверка создания поста."""
+    logging.info("API Test: Create Post Start")
+    api_helper = APIOperationsHelper()
+    api_helper.api_create_post()
+
+
+def test_step6(api_client):
+    """API тест: Проверка наличия описания созданного поста в списке постов."""
+    logging.info("API Test: Check Post Description Start")
+    api_helper = APIOperationsHelper()
+    api_helper.api_check_post_description()
+
+
+def test_step7(api_client):
+    """API тест: Проверка наличия текста для несуществующего поста."""
+    logging.info("API Test: Check Nonexistent Post Start")
+    api_helper = APIOperationsHelper()
+    api_helper.api_check_nonexistent_post()

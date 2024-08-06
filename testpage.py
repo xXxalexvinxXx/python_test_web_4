@@ -1,6 +1,7 @@
 import logging
-
+import requests
 from BaseApp import BasePage
+from BaseApp import BaseAPI
 from selenium.webdriver.common.by import By
 
 
@@ -166,3 +167,38 @@ class OperationsHelper(BasePage):
         text = alert.text
         alert.accept()
         return text
+
+
+class APIOperationsHelper(BaseAPI):
+    def api_create_post(self):
+        """API тест: Проверка создания поста."""
+        created_post = self.create_post()
+        assert created_post is not None, 'Пост не был создан'
+
+    def api_check_post_description(self):
+        """API тест: Проверка наличия описания созданного поста в списке постов."""
+        created_post = self.create_post()
+        try:
+            headers = {'X-Auth-Token': self.login_token}
+            response = requests.get(f'{self.base_url}api/posts', headers=headers)
+            response.raise_for_status()
+            post_descriptions = [post['description'] for post in response.json().get('data', [])]
+            assert created_post['description'] in post_descriptions, 'Описание поста не найдено'
+            logging.info("Описание поста найдено в списке постов")
+        except requests.RequestException as e:
+            logging.error(f"Ошибка при проверке наличия описания поста: {e}")
+            raise
+
+    def api_check_nonexistent_post(self):
+        """API тест: Проверка отсутствия текста для несуществующего поста."""
+        test_text = '123'
+        try:
+            headers = {'X-Auth-Token': self.login_token}
+            response = requests.get(f'{self.base_url}api/posts', params={'owner': 'notMe'}, headers=headers)
+            response.raise_for_status()
+            posts = response.json().get('data', [])
+            post_titles = [post['title'] for post in posts]
+            logging.info(f"Post titles retrieved: {post_titles}")
+            assert test_text not in post_titles, f"Текст '{test_text}' найден в заголовках постов"
+        except requests.RequestException as e:
+            raise Exception(f"Ошибка при проверке несуществующего поста: {e}")
